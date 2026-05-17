@@ -41,7 +41,7 @@ async def _instantiate(row: AgentModel, session: AsyncSession) -> BaseAgent | No
             )
 
         # Otherwise — pure LLM agent (direct call, no inter-bot)
-        tools = await build_tools(row.tools or [], session)
+        tools = await build_tools(row.tools or [])
         return LLMAgent(
             name=row.name,
             role=row.role,
