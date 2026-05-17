@@ -44,15 +44,12 @@ async def cb_reject(query: CallbackQuery) -> None:
     await approval.handle_reject(query)
 
 
-# ─── Free-form messages ────────────────────────────────────────────────────
+@router.message()
+async def msg_any(message: Message, bot: Bot) -> None:
+    """Catch-all: route by chat type."""
+    chat_type = message.chat.type if message.chat else ""
 
-@router.message(F.chat.type == "private")
-async def msg_private(message: Message) -> None:
-    """Any message in DM from owner → treat as task."""
-    await handler.handle_free_message(message)
-
-
-@router.message(F.chat.type.in_({"group", "supergroup"}))
-async def msg_group(message: Message, bot: Bot) -> None:
-    """Group message mentioning the bot → strip mention, treat as task."""
-    await handler.handle_group_mention(message, bot)
+    if chat_type == "private":
+        await handler.handle_free_message(message)
+    elif chat_type in ("group", "supergroup"):
+        await handler.handle_group_mention(message, bot)
