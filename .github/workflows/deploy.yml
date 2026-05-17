@@ -24,9 +24,31 @@ jobs:
               root@${{ secrets.SERVER_HOST }} << 'ENDSSH'
             set -e
             cd /var/www/vera-agents
-            git pull origin master
+
+            echo "=== git pull ==="
+            git fetch origin master
+            git reset --hard origin/master
+
+            echo "=== build ==="
             docker compose build agents
+
+            echo "=== restart ==="
+            docker compose stop agents  || true
+            docker compose rm -f agents || true
             docker compose up -d agents
-            echo "--- last 20 log lines ---"
-            docker compose logs --tail=20 agents
+
+            echo "=== waiting for startup (15s) ==="
+            sleep 15
+
+            STATUS=$(docker compose ps agents --format "{{.Status}}")
+            echo "Container status: $STATUS"
+
+            if echo "$STATUS" | grep -qiE "restarting|exited|unhealthy"; then
+              echo "ERROR: container failed to start"
+              docker compose logs agents --tail=60 --no-log-prefix
+              exit 1
+            fi
+
+            echo "=== OK — tail logs ==="
+            docker compose logs agents --tail=20 --no-log-prefix
           ENDSSH
