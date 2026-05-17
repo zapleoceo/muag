@@ -63,7 +63,7 @@ class Orchestrator:
         if not raw:
             return {"agents": [], "requests": {}}
         try:
-            return json.loads(raw)
+            return json.loads(_strip_fences(raw))
         except json.JSONDecodeError:
             log.warning("Plan JSON parse failed: %s", raw[:200])
             return {"agents": [], "requests": {}}
@@ -99,6 +99,16 @@ class Orchestrator:
         ]
         result = await self._provider.complete(messages)
         return result or ""
+
+
+def _strip_fences(text: str) -> str:
+    """Strip markdown code fences (```json ... ```) from LLM output."""
+    text = text.strip()
+    if text.startswith("```"):
+        text = text.split("\n", 1)[-1]
+    if text.endswith("```"):
+        text = text.rsplit("```", 1)[0]
+    return text.strip()
 
 
 def _format_calls(results: dict[str, AgentResponse]) -> list[dict]:
