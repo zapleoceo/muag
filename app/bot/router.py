@@ -1,10 +1,14 @@
 """Aiogram router — all bot commands and callbacks live here."""
+import logging
+import sys
+
 from aiogram import Bot, F, Router
 from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
 
 from app.bot import approval, handler
 
+log = logging.getLogger(__name__)
 router = Router()
 
 
@@ -48,8 +52,15 @@ async def cb_reject(query: CallbackQuery) -> None:
 async def msg_any(message: Message, bot: Bot) -> None:
     """Catch-all: route by chat type."""
     chat_type = message.chat.type if message.chat else ""
+    print(f"[VERA-HANDLER] msg_any chat_type={chat_type} text={str(message.text or '')[:100]}", flush=True, file=sys.stderr)
 
     if chat_type == "private":
         await handler.handle_free_message(message)
     elif chat_type in ("group", "supergroup"):
         await handler.handle_group_mention(message, bot)
+
+
+@router.edited_message()
+async def edited_msg(message: Message) -> None:
+    """Silently absorb edited messages to prevent 'not handled' noise."""
+    pass

@@ -44,7 +44,8 @@ async def lifespan(app: FastAPI):
 
         class LogAllMiddleware(BaseMiddleware):
             async def __call__(self, handler, event: TelegramObject, data: dict):
-                log.info("RAW UPDATE type=%s data=%s", type(event).__name__, str(event)[:300])
+                import sys
+                print(f"[VERA-MW] type={type(event).__name__} data={str(event)[:400]}", flush=True, file=sys.stderr)
                 return await handler(event, data)
 
         from app.bot.router import router as bot_router
