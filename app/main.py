@@ -1,8 +1,11 @@
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from aiogram import Bot, Dispatcher
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from app.config import get_settings
 from app.db.database import engine
@@ -14,6 +17,8 @@ log = logging.getLogger(__name__)
 _bot: Bot | None = None
 _dp: Dispatcher | None = None
 _polling_task = None
+
+_STATIC = Path(__file__).parent.parent / "static"
 
 
 def get_bot() -> Bot | None:
@@ -76,15 +81,29 @@ async def _start_polling(bot: Bot, dp: Dispatcher) -> None:
 
 app = FastAPI(title="VERA — Virtual Executive Response Architecture", lifespan=lifespan)
 
+# Static UI
+if _STATIC.exists():
+    app.mount("/static", StaticFiles(directory=str(_STATIC)), name="static")
+
 from app.api.agents_api import router as agents_router
 from app.api.credentials import router as creds_router
 from app.api.tasks_api import router as tasks_router
+from app.api.triggers_api import router as triggers_router
 from app.api.webhook import router as webhook_router
 
 app.include_router(agents_router)
 app.include_router(creds_router)
 app.include_router(tasks_router)
+app.include_router(triggers_router)
 app.include_router(webhook_router)
+
+
+@app.get("/")
+async def index():
+    index_file = _STATIC / "index.html"
+    if index_file.exists():
+        return FileResponse(str(index_file))
+    return {"status": "ok", "ui": "not found"}
 
 
 @app.get("/health")

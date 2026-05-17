@@ -12,8 +12,8 @@
 | 2 | Virtual Office — агенты в Telegram-топиках | ✅ Готово |
 | 3 | Триггеры — Gmail, Instagram, Webhook | ✅ Готово |
 | 4 | Агенты — заполнить все 9 | ✅ Готово (seed script) |
-| 5 | Admin UI | 🔄 В работе |
-| 6 | Hardening — deploy pipeline, alerting | ⏳ Ожидание |
+| 5 | Admin UI | ✅ Готово |
+| 6 | Hardening — deploy pipeline, alerting | 🔄 В работе |
 
 ---
 
@@ -106,9 +106,16 @@
 
 ## Фаза 5 — Admin UI
 
-- Single-page `static/index.html`, vanilla JS, без фреймворков
-- Разделы: Агенты / Credentials / Задачи / Триггеры / Запустить вручную
-- **Статус:** ⏳
+- Single-page `static/index.html`, vanilla JS, без фреймворков ✅
+- **Разделы:**
+  - **Задачи** — таблица с badge-статусами, раскрываемые agent_calls
+  - **▶ Запустить** — textarea + кнопка → `POST /api/tasks/`
+  - **Агенты** — таблица + форма создания/редактирования/удаления
+  - **Credentials** — таблица + форма с шаблонами JSON по типу (perplexity/trello/gmail/instagram/poster/openai)
+  - **Триггеры** — read-only список
+- **API:** `GET /api/triggers/` добавлен (`app/api/triggers_api.py`)
+- **Static:** `app/main.py` монтирует `/static`, `GET /` → `index.html`
+- **Deps:** добавлен `aiofiles`, `google-api-python-client`, `google-auth-oauthlib`
 
 ---
 
@@ -131,7 +138,8 @@
 | `0c04e3a` | Fix: tgbot_tgbot network name in docker-compose |
 | `9773c20` | Phase 1 MVP: aiogram bot handler (/task /status /agents), approval flow с кнопками, Telegram trigger (polling getUpdates), cron trigger fix (interval parsing), seed script для 9 агентов |
 | `09fbea1` | Phase 2 Virtual Office: AgentRunner (один polling task на бота), setup_office.py (createForumTopic), TelegramAgent (inter-bot протокол через топики), registry обновлён — автовыбор LLM vs Telegram агента |
-| `(phase-3)` | Phase 3 Triggers: Gmail (unread poll + seen_ids), Instagram (comments + DMs via Graph API), Webhook (POST /webhook/{name} + task_template) |
+| `5165db4` | Phase 3 Triggers: Gmail (unread poll + seen_ids), Instagram (comments + DMs via Graph API), Webhook (POST /webhook/{name} + task_template) |
+| `(phase-5)` | Phase 5 Admin UI: full SPA (Tasks/Run/Agents/Credentials/Triggers), triggers_api.py, static mount + GET /, aiofiles+google deps |
 
 ---
 
