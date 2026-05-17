@@ -138,6 +138,11 @@
 - **Файл:** `app/services/limiter.py`
 - **Что делает:** `asyncio.Semaphore(3)` — не более 3 задач одновременно. `tasks_api.py` оборачивает каждый запуск через `run_with_limit()`
 
+### 6.5 LLM — shared key pool ✅
+- **Файлы:** `app/llm/http_provider.py`, `app/llm/factory.py`
+- **Что делает:** VERA использует ключи myAI через `POST /api/internal/llm/complete`. Нет дублирования — Gemini/Deepseek/OpenAI ключи только в myAI DB. Авторизация — `MUAI_API_SECRET` == `API_SECRET_KEY`
+- **Приоритет fallback:** Gemini local key → OpenAI local key → myAI HTTP proxy → Stub
+
 ### 6.4 Self-improvement loop
 - **Статус:** ⏳ Следующий этап
 - **Идея:** агент сохраняет удачные примеры (score > 0.8) в отдельную таблицу, раз в N запусков LLM анализирует паттерны и предлагает улучшение system_prompt
@@ -155,7 +160,14 @@
 | `5165db4` | Phase 3 Triggers: Gmail (unread poll + seen_ids), Instagram (comments + DMs via Graph API), Webhook (POST /webhook/{name} + task_template) |
 | `8010099` | Phase 5 Admin UI: full SPA (Tasks/Run/Agents/Credentials/Triggers), triggers_api.py, static mount + GET /, aiofiles+google deps |
 | `eca5b2d` | Phase 6 Hardening: GitHub Actions SSH deploy, AlertingHandler (ERROR→Telegram, 5min cooldown), task concurrency Semaphore(3) |
-| `(final)` | Final: PLAN.md updated with GitHub Actions setup instructions, all phases complete |
+| `a6482a7` | Debug: outer_middleware для диагностики маршрутизации обновлений |
+| `a1cfbd3` | Fix(CI): заменить appleboy/ssh-action на native ssh — ssh-keyscan теперь non-fatal |
+| `38fe1a9` | Debug: print stderr в middleware и handler; добавлен edited_message handler |
+| `1263126` | Fix(CI): ssh-keyscan || true, исправлен printf без \n |
+| `096c854` | Feat: OpenAI provider fallback когда Gemini key исчерпан |
+| `900003e` | Feat: HttpLLMProvider — VERA использует ключи myAI через internal API (нет дублирования ключей) |
+| `716bf78` | Fix: Depends() в LLM proxy endpoint myAI |
+| `текущий` | Cleanup: удалён debug код, исправлен synthesize guard (пустые результаты), PLAN.md обновлён |
 
 ---
 

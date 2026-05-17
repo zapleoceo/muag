@@ -39,19 +39,9 @@ async def lifespan(app: FastAPI):
 
     # Telegram bot
     if settings.main_bot_token:
-        from aiogram import BaseMiddleware
-        from aiogram.types import TelegramObject
-
-        class LogAllMiddleware(BaseMiddleware):
-            async def __call__(self, handler, event: TelegramObject, data: dict):
-                import sys
-                print(f"[VERA-MW] type={type(event).__name__} data={str(event)[:400]}", flush=True, file=sys.stderr)
-                return await handler(event, data)
-
         from app.bot.router import router as bot_router
         _bot = Bot(token=settings.main_bot_token)
         _dp = Dispatcher()
-        _dp.update.outer_middleware(LogAllMiddleware())
         _dp.include_router(bot_router)
         import asyncio
         _polling_task = asyncio.create_task(_start_polling(_bot, _dp))

@@ -85,7 +85,10 @@ class Orchestrator:
         return results
 
     async def _synthesize(self, original_task: str, results: dict[str, AgentResponse]) -> str:
-        context_parts = [f"[{name}] (score={r.score:.2f})\n{r.text}" for name, r in results.items()]
+        useful = {name: r for name, r in results.items() if r.text and r.text != "[error]"}
+        if not useful:
+            return ""
+        context_parts = [f"[{name}] (score={r.score:.2f})\n{r.text}" for name, r in useful.items()]
         context = "\n\n".join(context_parts)
         messages = [
             LLMMessage(role="system", content=_SYNTHESIS_PROMPT),
