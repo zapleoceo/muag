@@ -168,6 +168,8 @@
 | `900003e` | Feat: HttpLLMProvider — VERA использует ключи myAI через internal API (нет дублирования ключей) |
 | `716bf78` | Fix: Depends() в LLM proxy endpoint myAI |
 | `текущий` | Cleanup: удалён debug код, исправлен synthesize guard (пустые результаты), PLAN.md обновлён |
+| `c30efa2` | Feat: fix muai_rag URL+auth → /api/internal/rag/search с Bearer; tool params в LLM prompt |
+| `myAI:06b4fc7` | Feat(myAI): /api/internal/rag/search — proxy для поиска по переписке владельца |
 
 ---
 
