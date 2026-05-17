@@ -10,7 +10,8 @@ class Settings(BaseSettings):
     owner_telegram_id: int
     office_group_id: int = 0
 
-    gemini_api_key: str = ""  # seeded into DB on first start; use DB table for runtime rotation
+    gemini_api_key: str = ""
+    openai_api_key: str = ""
 
     muai_api_url: str = "http://bot:8000"
     muai_api_secret: str = ""
