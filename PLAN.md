@@ -170,6 +170,7 @@
 | `текущий` | Cleanup: удалён debug код, исправлен synthesize guard (пустые результаты), PLAN.md обновлён |
 | `c30efa2` | Feat: fix muai_rag URL+auth → /api/internal/rag/search с Bearer; tool params в LLM prompt |
 | `myAI:06b4fc7` | Feat(myAI): /api/internal/rag/search — proxy для поиска по переписке владельца |
+| `da32be0` | Fix: strip markdown fences из JSON ответа LLM в orchestrator._plan() — агенты теперь реально вызываются |
 
 ---
 
