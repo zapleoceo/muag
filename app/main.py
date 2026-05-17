@@ -50,7 +50,7 @@ async def lifespan(app: FastAPI):
         from app.bot.router import router as bot_router
         _bot = Bot(token=settings.main_bot_token)
         _dp = Dispatcher()
-        _dp.update.middleware(LogAllMiddleware())
+        _dp.update.outer_middleware(LogAllMiddleware())
         _dp.include_router(bot_router)
         import asyncio
         _polling_task = asyncio.create_task(_start_polling(_bot, _dp))
