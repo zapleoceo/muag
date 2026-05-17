@@ -1,0 +1,18 @@
+services:
+  agents:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8001:8001"
+    env_file: .env
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+    networks:
+      - tgbot
+
+networks:
+  tgbot:
+    external: true
