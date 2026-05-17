@@ -1,5 +1,5 @@
 """Aiogram router — all bot commands and callbacks live here."""
-from aiogram import F, Router
+from aiogram import Bot, F, Router
 from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
 
@@ -12,8 +12,8 @@ router = Router()
 async def cmd_start(message: Message) -> None:
     await message.answer(
         "👋 VERA — Virtual Executive Response Architecture\n\n"
+        "Просто напиши мне что нужно сделать — в личку или упомяни в группе.\n\n"
         "Команды:\n"
-        "/task <текст> — поставить задачу агентам\n"
         "/status — последние задачи\n"
         "/agents — список активных агентов"
     )
@@ -42,3 +42,17 @@ async def cb_approve(query: CallbackQuery) -> None:
 @router.callback_query(F.data.startswith("reject:"))
 async def cb_reject(query: CallbackQuery) -> None:
     await approval.handle_reject(query)
+
+
+# ─── Free-form messages ────────────────────────────────────────────────────
+
+@router.message(F.chat.type == "private")
+async def msg_private(message: Message) -> None:
+    """Any message in DM from owner → treat as task."""
+    await handler.handle_free_message(message)
+
+
+@router.message(F.chat.type.in_({"group", "supergroup"}))
+async def msg_group(message: Message, bot: Bot) -> None:
+    """Group message mentioning the bot → strip mention, treat as task."""
+    await handler.handle_group_mention(message, bot)
