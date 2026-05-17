@@ -12,6 +12,7 @@ log = logging.getLogger(__name__)
 class GmailTool(BaseTool):
     name = "gmail"
     description = "Read recent Gmail messages and send email replies."
+    params = {"action": "list|send", "max_results": "number of emails to fetch (for list)", "to": "recipient email (for send)", "subject": "email subject (for send)", "body": "email body text (for send)"}
 
     def __init__(self, credentials_json: str) -> None:
         self._creds_json = credentials_json

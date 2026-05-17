@@ -8,6 +8,7 @@ _BASE = "https://api.trello.com/1"
 class TrelloTool(BaseTool):
     name = "trello"
     description = "Manage Trello boards: list cards, create/update cards, move cards."
+    params = {"action": "list_cards|create_card", "board_id": "Trello board ID (for list_cards)", "name": "card name (for create_card)", "list_id": "Trello list ID (for create_card)", "desc": "card description (optional)"}
 
     def __init__(self, api_key: str, token: str) -> None:
         self._auth = {"key": api_key, "token": token}

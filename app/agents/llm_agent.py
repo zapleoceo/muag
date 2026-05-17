@@ -62,10 +62,18 @@ class LLMAgent(BaseAgent):
         return AgentResponse(text=raw or "", score=0.0, retries=retries)
 
     def _build_messages(self, request: str, context: str) -> list[LLMMessage]:
-        tools_desc = "\n".join(f"- {t.schema()['name']}: {t.schema()['description']}" for t in self._tools.values())
+        def _fmt_tool(t: "BaseTool") -> str:
+            s = t.schema()
+            line = f"- {s['name']}: {s['description']}"
+            if s.get("params"):
+                params_str = ", ".join(f"{k}={v}" for k, v in s["params"].items())
+                line += f" | params: {params_str}"
+            return line
+
+        tools_desc = "\n".join(_fmt_tool(t) for t in self._tools.values())
         system = self._system_prompt
         if tools_desc:
-            system += f"\n\nAvailable tools:\n{tools_desc}\nTo use a tool, output: TOOL:<name> ARGS:<json>"
+            system += f"\n\nAvailable tools:\n{tools_desc}\nTo use a tool, output exactly: TOOL:<name> ARGS:<json_object>"
 
         msgs = [LLMMessage(role="system", content=system)]
         if context:

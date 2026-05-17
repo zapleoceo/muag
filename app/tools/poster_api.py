@@ -8,6 +8,7 @@ _BASE = "https://joinposter.com/api"
 class PosterTool(BaseTool):
     name = "poster_pos"
     description = "Query Poster POS: get sales stats, products, transactions."
+    params = {"method": "Poster API method, e.g. dash.getAnalytics, menu.getProducts", "params": "optional dict of extra query params"}
 
     def __init__(self, token: str) -> None:
         self._token = token

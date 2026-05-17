@@ -12,11 +12,16 @@ class ToolResult:
 class BaseTool(ABC):
     name: str
     description: str
+    # Override in subclasses: {"param": "description", ...}
+    params: dict[str, str] = {}
 
     @abstractmethod
     async def run(self, **kwargs) -> ToolResult:
         ...
 
     def schema(self) -> dict:
-        """Return JSON-schema-like description for the orchestrator prompt."""
-        return {"name": self.name, "description": self.description}
+        return {
+            "name": self.name,
+            "description": self.description,
+            "params": self.params,
+        }

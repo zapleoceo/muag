@@ -8,6 +8,7 @@ _BASE = "https://api.perplexity.ai"
 class PerplexityTool(BaseTool):
     name = "web_search"
     description = "Search the web for current information using Perplexity AI."
+    params = {"query": "search query string"}
 
     def __init__(self, api_key: str) -> None:
         self._api_key = api_key
