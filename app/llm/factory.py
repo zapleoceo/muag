@@ -28,6 +28,11 @@ def _build_provider() -> LLMProvider:
         log.info("LLM: OpenAIProvider (gpt-4o-mini)")
         return OpenAIProvider(api_key=settings.openai_api_key)
 
-    log.warning("No LLM API key configured — using stub")
+    if settings.muai_api_url and settings.muai_api_secret:
+        from app.llm.http_provider import HttpLLMProvider
+        log.info("LLM: HttpLLMProvider → %s", settings.muai_api_url)
+        return HttpLLMProvider(base_url=settings.muai_api_url, secret=settings.muai_api_secret)
+
+    log.warning("No LLM configured — using stub")
     from app.llm.stub import StubProvider
     return StubProvider()
