@@ -16,3 +16,4 @@ services:
 networks:
   tgbot:
     external: true
+    name: tgbot_tgbot
