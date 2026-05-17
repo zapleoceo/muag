@@ -124,8 +124,10 @@
 ### 6.1 GitHub Actions auto-deploy ✅
 - **Файл:** `.github/workflows/deploy.yml`
 - **Что делает:** на каждый push в `master` → SSH на сервер → `git pull` → `docker compose build` → `docker compose up -d`
-- **Секреты в GitHub:** `SERVER_HOST=195.201.31.49`, `SERVER_PORT=9617`, `SERVER_SSH_KEY=<приватный ключ>`
-- **Как добавить ключ:** Settings → Secrets → Actions → New repository secret
+- **⚠️ Нужно добавить вручную** на https://github.com/zapleoceo/muag/settings/secrets/actions:
+  - `SERVER_HOST` = `195.201.31.49`
+  - `SERVER_PORT` = `9617`
+  - `SERVER_SSH_KEY` = содержимое файла `D:\Projects\hetzner\hetzner_195.201.31.49_ed25519`
 
 ### 6.2 Error alerting ✅
 - **Файл:** `app/services/alerting.py`
@@ -152,7 +154,8 @@
 | `09fbea1` | Phase 2 Virtual Office: AgentRunner (один polling task на бота), setup_office.py (createForumTopic), TelegramAgent (inter-bot протокол через топики), registry обновлён — автовыбор LLM vs Telegram агента |
 | `5165db4` | Phase 3 Triggers: Gmail (unread poll + seen_ids), Instagram (comments + DMs via Graph API), Webhook (POST /webhook/{name} + task_template) |
 | `8010099` | Phase 5 Admin UI: full SPA (Tasks/Run/Agents/Credentials/Triggers), triggers_api.py, static mount + GET /, aiofiles+google deps |
-| `(phase-6)` | Phase 6 Hardening: GitHub Actions SSH deploy, AlertingHandler (ERROR→Telegram, 5min cooldown), task concurrency Semaphore(3) |
+| `eca5b2d` | Phase 6 Hardening: GitHub Actions SSH deploy, AlertingHandler (ERROR→Telegram, 5min cooldown), task concurrency Semaphore(3) |
+| `(final)` | Final: PLAN.md updated with GitHub Actions setup instructions, all phases complete |
 
 ---
 
