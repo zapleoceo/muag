@@ -10,9 +10,9 @@
 |------|----------|--------|
 | 1 | MVP — бот + approval + триггер | ✅ Готово |
 | 2 | Virtual Office — агенты в Telegram-топиках | ✅ Готово |
-| 3 | Триггеры — Gmail, Instagram, Webhook | 🔄 В работе |
-| 4 | Агенты — заполнить все 9 | ⏳ Ожидание |
-| 5 | Admin UI | ⏳ Ожидание |
+| 3 | Триггеры — Gmail, Instagram, Webhook | ✅ Готово |
+| 4 | Агенты — заполнить все 9 | ✅ Готово (seed script) |
+| 5 | Admin UI | 🔄 В работе |
 | 6 | Hardening — deploy pipeline, alerting | ⏳ Ожидание |
 
 ---
@@ -70,20 +70,21 @@
 
 ## Фаза 3 — Триггеры
 
-### 3.1 Gmail trigger
+### 3.1 Gmail trigger ✅
 - **Файлы:** `app/triggers/gmail_trigger.py`
-- **Что делает:** каждые N минут проверяет inbox, новые письма → создаёт задачу GmailAgent
-- **Статус:** ⏳
+- **Что делает:** опрашивает Gmail `is:unread`, фильтрует через `_seen_ids`, создаёт задачу для GmailAgent с темой + фрагментом письма
+- **Credentials в DB:** `tool_credentials` type=`gmail`, `{"token":..., "refresh_token":..., "client_id":..., "client_secret":...}`
+- **Config в AgentTrigger:** `{"credentials_json": "...", "max_results": 5}`
 
-### 3.2 Instagram trigger
+### 3.2 Instagram trigger ✅
 - **Файлы:** `app/triggers/instagram_trigger.py`
-- **Что делает:** polling новых комментариев/DM через Instagram Graph API, передаёт InstagramAgent
-- **Статус:** ⏳
+- **Что делает:** опрашивает комментарии к постам и DM через Graph API v19.0. `_seen_ids` предотвращает дубли. DM — только если есть разрешение `instagram_manage_messages`
+- **Config в AgentTrigger:** `{"access_token": "...", "ig_user_id": "..."}`
 
-### 3.3 Webhook trigger
+### 3.3 Webhook trigger ✅
 - **Файлы:** `app/api/webhook.py`
-- **Что делает:** `POST /webhook/{name}` → создаёт задачу для указанных агентов
-- **Статус:** ⏳
+- **Что делает:** `POST /webhook/{name}` ищет `AgentTrigger` с `type=webhook`, создаёт `AgentTask`. Поддерживает `task_template` в config для форматирования тела запроса
+- **Пример:** Zapier делает POST → VERA получает задачу → нужные агенты отрабатывают
 
 ---
 
@@ -129,7 +130,8 @@
 | `7d71278` | Initial scaffold: orchestrator, tools, triggers, API, DB models |
 | `0c04e3a` | Fix: tgbot_tgbot network name in docker-compose |
 | `9773c20` | Phase 1 MVP: aiogram bot handler (/task /status /agents), approval flow с кнопками, Telegram trigger (polling getUpdates), cron trigger fix (interval parsing), seed script для 9 агентов |
-| `(phase-2)` | Phase 2 Virtual Office: AgentRunner (один polling task на бота), setup_office.py (createForumTopic), TelegramAgent (inter-bot протокол через топики), registry обновлён — автовыбор LLM vs Telegram агента |
+| `09fbea1` | Phase 2 Virtual Office: AgentRunner (один polling task на бота), setup_office.py (createForumTopic), TelegramAgent (inter-bot протокол через топики), registry обновлён — автовыбор LLM vs Telegram агента |
+| `(phase-3)` | Phase 3 Triggers: Gmail (unread poll + seen_ids), Instagram (comments + DMs via Graph API), Webhook (POST /webhook/{name} + task_template) |
 
 ---
 

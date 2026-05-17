@@ -79,10 +79,12 @@ app = FastAPI(title="VERA — Virtual Executive Response Architecture", lifespan
 from app.api.agents_api import router as agents_router
 from app.api.credentials import router as creds_router
 from app.api.tasks_api import router as tasks_router
+from app.api.webhook import router as webhook_router
 
 app.include_router(agents_router)
 app.include_router(creds_router)
 app.include_router(tasks_router)
+app.include_router(webhook_router)
 
 
 @app.get("/health")
