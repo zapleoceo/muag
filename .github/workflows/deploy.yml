@@ -1,0 +1,25 @@
+name: Deploy VERA
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: root
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
+          script: |
+            set -e
+            cd /var/www/vera-agents
+            git pull origin master
+            docker compose build agents
+            docker compose up -d agents
+            echo "--- last 20 log lines ---"
+            docker compose logs --tail=20 agents

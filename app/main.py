@@ -56,6 +56,12 @@ async def lifespan(app: FastAPI):
     # Triggers
     start_trigger_manager()
 
+    # Error alerting — sends CRITICAL/ERROR logs to owner via Telegram
+    import asyncio as _asyncio
+    from app.services.alerting import AlertingHandler
+    alerting_handler = AlertingHandler(loop=_asyncio.get_event_loop())
+    logging.getLogger().addHandler(alerting_handler)
+
     log.info("VERA started")
     yield
 

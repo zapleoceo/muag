@@ -35,7 +35,8 @@ async def submit_task(body: TaskIn, session: AsyncSession = Depends(_session)):
         status="queued",
     )
     task = await save_task(session, task)
-    asyncio.create_task(_run_task(task.id))
+    from app.services.limiter import run_with_limit
+    asyncio.create_task(run_with_limit(_run_task(task.id)))
     return {"task_id": task.id, "status": "queued"}
 
 

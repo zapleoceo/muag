@@ -13,7 +13,7 @@
 | 3 | Триггеры — Gmail, Instagram, Webhook | ✅ Готово |
 | 4 | Агенты — заполнить все 9 | ✅ Готово (seed script) |
 | 5 | Admin UI | ✅ Готово |
-| 6 | Hardening — deploy pipeline, alerting | 🔄 В работе |
+| 6 | Hardening — deploy pipeline, alerting | ✅ Готово (self-improve ⏳) |
 
 ---
 
@@ -121,12 +121,24 @@
 
 ## Фаза 6 — Hardening
 
-- [ ] GitHub Actions auto-deploy (`git push` → сервер)
-- [ ] Error alerting → Telegram владельцу
-- [ ] Rate limiting на API
-- [ ] Task queue concurrency limit
-- [ ] Self-improvement: агент сохраняет примеры, обновляет system_prompt
-- **Статус:** ⏳
+### 6.1 GitHub Actions auto-deploy ✅
+- **Файл:** `.github/workflows/deploy.yml`
+- **Что делает:** на каждый push в `master` → SSH на сервер → `git pull` → `docker compose build` → `docker compose up -d`
+- **Секреты в GitHub:** `SERVER_HOST=195.201.31.49`, `SERVER_PORT=9617`, `SERVER_SSH_KEY=<приватный ключ>`
+- **Как добавить ключ:** Settings → Secrets → Actions → New repository secret
+
+### 6.2 Error alerting ✅
+- **Файл:** `app/services/alerting.py`
+- **Что делает:** `AlertingHandler` — logging handler уровня ERROR, отправляет сообщение в Telegram владельцу. Cooldown 5 мин на одинаковые ошибки. Трейсбек обрезается до 800 символов
+- **Подключён** в `main.py` lifespan
+
+### 6.3 Task concurrency limit ✅
+- **Файл:** `app/services/limiter.py`
+- **Что делает:** `asyncio.Semaphore(3)` — не более 3 задач одновременно. `tasks_api.py` оборачивает каждый запуск через `run_with_limit()`
+
+### 6.4 Self-improvement loop
+- **Статус:** ⏳ Следующий этап
+- **Идея:** агент сохраняет удачные примеры (score > 0.8) в отдельную таблицу, раз в N запусков LLM анализирует паттерны и предлагает улучшение system_prompt
 
 ---
 
@@ -139,7 +151,8 @@
 | `9773c20` | Phase 1 MVP: aiogram bot handler (/task /status /agents), approval flow с кнопками, Telegram trigger (polling getUpdates), cron trigger fix (interval parsing), seed script для 9 агентов |
 | `09fbea1` | Phase 2 Virtual Office: AgentRunner (один polling task на бота), setup_office.py (createForumTopic), TelegramAgent (inter-bot протокол через топики), registry обновлён — автовыбор LLM vs Telegram агента |
 | `5165db4` | Phase 3 Triggers: Gmail (unread poll + seen_ids), Instagram (comments + DMs via Graph API), Webhook (POST /webhook/{name} + task_template) |
-| `(phase-5)` | Phase 5 Admin UI: full SPA (Tasks/Run/Agents/Credentials/Triggers), triggers_api.py, static mount + GET /, aiofiles+google deps |
+| `8010099` | Phase 5 Admin UI: full SPA (Tasks/Run/Agents/Credentials/Triggers), triggers_api.py, static mount + GET /, aiofiles+google deps |
+| `(phase-6)` | Phase 6 Hardening: GitHub Actions SSH deploy, AlertingHandler (ERROR→Telegram, 5min cooldown), task concurrency Semaphore(3) |
 
 ---
 
