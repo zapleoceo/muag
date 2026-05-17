@@ -9,8 +9,8 @@
 | Фаза | Название | Статус |
 |------|----------|--------|
 | 1 | MVP — бот + approval + триггер | ✅ Готово |
-| 2 | Virtual Office — агенты в Telegram-топиках | 🔄 В работе |
-| 3 | Триггеры — Gmail, Instagram, Webhook | ⏳ Ожидание |
+| 2 | Virtual Office — агенты в Telegram-топиках | ✅ Готово |
+| 3 | Триггеры — Gmail, Instagram, Webhook | 🔄 В работе |
 | 4 | Агенты — заполнить все 9 | ⏳ Ожидание |
 | 5 | Admin UI | ⏳ Ожидание |
 | 6 | Hardening — deploy pipeline, alerting | ⏳ Ожидание |
@@ -50,20 +50,21 @@
 
 ## Фаза 2 — Virtual Office
 
-### 2.1 AgentRunner
+### 2.1 AgentRunner ✅
 - **Файлы:** `app/agents/runner.py`
-- **Что делает:** для каждого активного агента с `bot_token` запускает отдельный aiogram Dispatcher в фоне
-- **Статус:** ⏳
+- **Что делает:** при старте загружает всех агентов с `bot_token` из DB, стартует отдельный `aiogram.Dispatcher` для каждого. Бот отвечает только в своём `home_topic_id`
+- **Как работает:** каждый агент-бот — отдельный `asyncio.Task`. Словари `_bots` и `_tasks` хранят живые инстансы. `stop_agent_runners()` — graceful shutdown
 
-### 2.2 Setup скрипт
+### 2.2 Setup скрипт ✅
 - **Файлы:** `scripts/setup_office.py`
-- **Что делает:** создаёт топики в supergroup, сохраняет `home_topic_id` в DB для каждого агента
-- **Статус:** ⏳
+- **Что делает:** вызывает `createForumTopic` для каждого агента в `OFFICE_GROUP_ID`, сохраняет `home_topic_id` в DB. Пропускает уже настроенных
+- **Запуск:** `docker compose exec agents python -m scripts.setup_office`
+- **Требует:** forum (topics) включены в supergroup, бот — администратор группы
 
-### 2.3 Inter-bot протокол
-- **Файлы:** `app/agents/telegram_agent.py`
-- **Что делает:** оркестратор постит задачу в топик агента → агент-бот отвечает → оркестратор читает ответ через bot API
-- **Статус:** ⏳
+### 2.3 Inter-bot протокол ✅
+- **Файлы:** `app/agents/telegram_agent.py`, обновлён `app/agents/registry.py`
+- **Что делает:** оркестратор постит задачу через main bot в топик агента → агент-бот отвечает reply → TelegramAgent.`_wait_for_reply()` читает getUpdates агентского бота 60 сек, возвращает текст ответа
+- **Фоллбек:** если у агента нет `bot_token`/`home_topic_id` — используется LLMAgent (прямой вызов LLM)
 
 ---
 
@@ -127,7 +128,8 @@
 |--------|-------------|
 | `7d71278` | Initial scaffold: orchestrator, tools, triggers, API, DB models |
 | `0c04e3a` | Fix: tgbot_tgbot network name in docker-compose |
-| `(phase-1)` | Phase 1 MVP: aiogram bot handler (/task /status /agents), approval flow с кнопками, Telegram trigger (polling getUpdates), cron trigger fix (interval parsing), seed script для 9 агентов |
+| `9773c20` | Phase 1 MVP: aiogram bot handler (/task /status /agents), approval flow с кнопками, Telegram trigger (polling getUpdates), cron trigger fix (interval parsing), seed script для 9 агентов |
+| `(phase-2)` | Phase 2 Virtual Office: AgentRunner (один polling task на бота), setup_office.py (createForumTopic), TelegramAgent (inter-bot протокол через топики), registry обновлён — автовыбор LLM vs Telegram агента |
 
 ---
 

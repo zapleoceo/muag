@@ -26,6 +26,21 @@ async def load_agents(session: AsyncSession) -> dict[str, BaseAgent]:
 
 async def _instantiate(row: AgentModel, session: AsyncSession) -> BaseAgent | None:
     try:
+        from app.config import get_settings
+
+        # If agent has its own bot token and a home topic → use TelegramAgent (inter-bot)
+        settings = get_settings()
+        if row.bot_token and row.home_topic_id and settings.office_group_id:
+            from app.agents.telegram_agent import TelegramAgent
+            return TelegramAgent(
+                name=row.name,
+                role=row.role,
+                bot_token=row.bot_token,
+                home_topic_id=row.home_topic_id,
+                office_group_id=settings.office_group_id,
+            )
+
+        # Otherwise — pure LLM agent (direct call, no inter-bot)
         tools = await build_tools(row.tools or [], session)
         return LLMAgent(
             name=row.name,

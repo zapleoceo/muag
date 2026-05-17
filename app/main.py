@@ -44,6 +44,10 @@ async def lifespan(app: FastAPI):
     else:
         log.warning("MAIN_BOT_TOKEN not set — bot disabled")
 
+    # Agent bots (one polling task per agent with bot_token)
+    from app.agents.runner import start_agent_runners
+    await start_agent_runners()
+
     # Triggers
     start_trigger_manager()
 
@@ -51,6 +55,8 @@ async def lifespan(app: FastAPI):
     yield
 
     # Shutdown
+    from app.agents.runner import stop_agent_runners
+    await stop_agent_runners()
     stop_trigger_manager()
     if _polling_task:
         _polling_task.cancel()
